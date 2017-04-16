@@ -1,0 +1,6 @@
+[package]
+name = "markdown_wiki_processor"
+version = "0.1.0"
+authors = ["Pedro Veloso <pedro.n.veloso@gmail.com>"]
+
+[dependencies]
