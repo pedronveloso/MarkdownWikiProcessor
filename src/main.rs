@@ -5,6 +5,9 @@ use std::io::BufRead;
 use std::io;
 use std::path::Path;
 use std::ffi::OsStr;
+use std::io::Write;
+use std::io::Seek;
+use std::io::SeekFrom;
 
 
 #[allow(dead_code)]
@@ -25,18 +28,22 @@ fn transverse_directory(path: &Path){
 
         // Ignore hidden directories/files
         let os_str = OsStr::new(".git");
-        let osname = path.file_name();
-        let name = osname.unwrap().to_str();
-        if !name.unwrap().starts_with(".") {
-            println!("{}", path.display());
+        let os_filename = path.file_name();
+        let name = os_filename.unwrap().to_str().unwrap();
+        if !name.starts_with(".") {
             if path.is_dir() {
                 // TODO: Iterate over the other sub-directories
-                //transverse_directory(&path)
+                transverse_directory(&path)
             } else {
                 // TODO : Skip files named index.md | readme.md
                 // TODO : Only handle '.md' files
-                // Handle this file
-                handle_file(&path)
+                if name.ends_with(".md") {
+                    // Print file name being handled
+                    println!("{}", path.display());
+
+                    // Handle this file
+                    handle_file(&path);
+                }
             }
         }
     }
@@ -60,6 +67,22 @@ fn handle_file(file_path: &Path){
         }
     };
 
-    println!("Found TOC: {}", found_toc);
+    // Add TOC in case it was missing
+    if GEN_TOC {
+        println!(" >Found TOC: {}", found_toc);
+        add_toc(&file_path);
+    }
+
+    // Add extra line to improve readability of next file
+    println!();
+}
+
+/**
+* Adds a TOC entry to the first line of a given file
+**/
+fn add_toc(file_path: &Path){
+    //let mut file = OpenOptions::new().write(true).open(&file_path).unwrap();
+    //file.seek(SeekFrom::Start(0));
+    //file.write_all(b"[TOC]\n\n");
 }
 
