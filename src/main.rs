@@ -49,7 +49,7 @@ fn handle_file(file_path: &Path){
         Ok(file) => {
             let br = BufReader::new(file);
             for line in br.lines() {
-                if line.unwrap().contains("toc") {
+                if line.unwrap().contains("[toc]") {
                     found_toc = true;
                 }
                 //println!("{}", line.unwrap());
