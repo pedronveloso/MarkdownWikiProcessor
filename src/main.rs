@@ -6,6 +6,7 @@ use std::io;
 use std::path::Path;
 use std::ffi::OsStr;
 use std::io::Write;
+use std::io::Read;
 use std::io::Seek;
 use std::io::SeekFrom;
 
@@ -56,7 +57,7 @@ fn handle_file(file_path: &Path){
         Ok(file) => {
             let br = BufReader::new(file);
             for line in br.lines() {
-                if line.unwrap().contains("[toc]") {
+                if line.unwrap().to_lowercase().contains("[toc]") {
                     found_toc = true;
                 }
                 //println!("{}", line.unwrap());
@@ -70,7 +71,9 @@ fn handle_file(file_path: &Path){
     // Add TOC in case it was missing
     if GEN_TOC {
         println!(" >Found TOC: {}", found_toc);
-        add_toc(&file_path);
+        if !found_toc {
+            add_toc(&file_path);
+        }
     }
 
     // Add extra line to improve readability of next file
@@ -81,8 +84,16 @@ fn handle_file(file_path: &Path){
 * Adds a TOC entry to the first line of a given file
 **/
 fn add_toc(file_path: &Path){
-    //let mut file = OpenOptions::new().write(true).open(&file_path).unwrap();
-    //file.seek(SeekFrom::Start(0));
-    //file.write_all(b"[TOC]\n\n");
+    // Load entire file into memory
+    let mut fileRead = OpenOptions::new().read(true).open(&file_path).expect("Unable to read file");
+    let mut contents = String::new();
+    fileRead.read_to_string(&mut contents).expect("Unable to read the file");
+
+
+    // Write TOC and then the rest of the file back
+    let mut fileWrite = OpenOptions::new().write(true).open(&file_path).unwrap();
+    //fileWrite.seek(SeekFrom::Start(0));
+    fileWrite.write_all(b"[TOC]\n\n");
+    fileWrite.write_all(contents.as_bytes());
 }
 
