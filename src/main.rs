@@ -37,7 +37,7 @@ fn transverse_directory(path: &Path){
                 transverse_directory(&path)
             } else {
                 // TODO : Skip files named index.md | readme.md
-                // TODO : Only handle '.md' files
+                // Only handle '.md' files
                 if name.ends_with(".md") {
                     // Print file name being handled
                     println!("{}", path.display());
@@ -85,15 +85,17 @@ fn handle_file(file_path: &Path){
 **/
 fn add_toc(file_path: &Path){
     // Load entire file into memory
-    let mut fileRead = OpenOptions::new().read(true).open(&file_path).expect("Unable to read file");
+    let mut file_read = OpenOptions::new().read(true)
+        .open(&file_path)
+        .expect("Unable to read file");
+
     let mut contents = String::new();
-    fileRead.read_to_string(&mut contents).expect("Unable to read the file");
+    file_read.read_to_string(&mut contents).expect("Unable to read the file");
 
 
-    // Write TOC and then the rest of the file back
-    let mut fileWrite = OpenOptions::new().write(true).open(&file_path).unwrap();
-    //fileWrite.seek(SeekFrom::Start(0));
-    fileWrite.write_all(b"[TOC]\n\n");
-    fileWrite.write_all(contents.as_bytes());
+    // Write TOC Header and then the rest of the file back
+    let mut file_write = OpenOptions::new().write(true).open(&file_path).unwrap();
+    file_write.write_all(b"[TOC]\n\n");
+    file_write.write_all(contents.as_bytes());
 }
 
