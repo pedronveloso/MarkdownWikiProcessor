@@ -31,7 +31,7 @@ fn transverse_directory(path: &Path){
         let name = os_filename.unwrap().to_str().unwrap();
         if !name.starts_with(".") {
             if path.is_dir() {
-                // TODO: Iterate over the other sub-directories
+                // Iterate over the other sub-directories
                 transverse_directory(&path)
             } else {
                 // Only handle '.md' files
@@ -67,7 +67,7 @@ fn transverse_directory(path: &Path){
 fn handle_file(file_path: &Path){
     // Read trough the file
     let mut found_toc = false;
-    let f = match File::open(file_path) {
+    let _ = match File::open(file_path) {
         Ok(file) => {
             let br = BufReader::new(file);
             for line in br.lines() {
@@ -100,7 +100,7 @@ fn add_toc(file_path: &Path){
     // Load entire file into memory
     let mut file_read = OpenOptions::new().read(true)
         .open(&file_path)
-        .expect("Unable to read file");
+        .expect("Unable to open file for reading");
 
     let mut contents = String::new();
     file_read.read_to_string(&mut contents).expect("Unable to read the file");
@@ -108,7 +108,7 @@ fn add_toc(file_path: &Path){
 
     // Write TOC Header and then the rest of the file back
     let mut file_write = OpenOptions::new().write(true).open(&file_path).unwrap();
-    file_write.write_all(b"[TOC]\n\n");
-    file_write.write_all(contents.as_bytes());
+    file_write.write_all(b"[TOC]\n\n").expect("Unable to write TOC");
+    file_write.write_all(contents.as_bytes()).expect("Unable to re-write file");
 }
 
