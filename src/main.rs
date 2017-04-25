@@ -81,10 +81,13 @@ fn handle_file(file_path: &Path){
         }
     };
 
-    // Add TOC in case it was missing
+    // Table of Contents handling
     if GEN_TOC {
         println!(" >Found TOC: {}", found_toc);
         if !found_toc {
+            // TODO: Should not add TOC if there are no headers (AKA empty TOC)
+
+            // Add TOC in case it was missing
             add_toc(&file_path);
         }
     }
