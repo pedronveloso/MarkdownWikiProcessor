@@ -1,22 +1,21 @@
 use std::fs::{self, File, OpenOptions};
-use std::fs::{DirEntry};
 use std::io::BufReader;
 use std::io::BufRead;
-use std::io;
 use std::path::Path;
-use std::ffi::OsStr;
 use std::io::Write;
 use std::io::Read;
-use std::io::Seek;
-use std::io::SeekFrom;
 
-
-#[allow(dead_code)]
+// TODO: Change this constants into command line parameters
 static GEN_TOC: bool = true;
+static SKIP_INDEX: bool = true;
+static SKIP_README: bool = true;
+static MAIN_PATH: &'static str = "/home/pedro/documents/markdown_notes";
 
 fn main() {
     println!("Generate TOC: {}",GEN_TOC);
-    static MAIN_PATH: &'static str = "/home/pedro/documents/markdown_notes";
+    println!("Skip index.md files: {}",SKIP_INDEX);
+    println!("Skip readme.md files: {}",SKIP_README);
+
     let path = Path::new(MAIN_PATH);
     transverse_directory(&path);
 }
@@ -24,11 +23,10 @@ fn main() {
 fn transverse_directory(path: &Path){
     let entries = fs::read_dir(path).unwrap();
 
-    for entry in entries {
+    'nextfile: for entry in entries {
         let path = entry.unwrap().path();
 
         // Ignore hidden directories/files
-        let os_str = OsStr::new(".git");
         let os_filename = path.file_name();
         let name = os_filename.unwrap().to_str().unwrap();
         if !name.starts_with(".") {
@@ -36,9 +34,25 @@ fn transverse_directory(path: &Path){
                 // TODO: Iterate over the other sub-directories
                 transverse_directory(&path)
             } else {
-                // TODO : Skip files named index.md | readme.md
                 // Only handle '.md' files
                 if name.ends_with(".md") {
+
+                    // Skip files named index.md | readme.md
+                    match name.as_ref() {
+                        "readme.md" => {
+                            if SKIP_README{
+                                continue;
+                            }
+                        },
+                        "index.md" => {
+                            if SKIP_INDEX{
+                                continue;
+                            }
+                        },
+                        _ => {
+                            // All good, move along
+                        }
+                    }
                     // Print file name being handled
                     println!("{}", path.display());
 
@@ -60,7 +74,6 @@ fn handle_file(file_path: &Path){
                 if line.unwrap().to_lowercase().contains("[toc]") {
                     found_toc = true;
                 }
-                //println!("{}", line.unwrap());
             }
         },
         Err(e) => {
